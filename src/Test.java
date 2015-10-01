@@ -1,4 +1,14 @@
 
+
+/**This test file is used for the Fragmentation Verification.
+ * There are 8 arrays. 7 of them are 1MB, and one of them is 1/2 MB. They are the data that will be Put() into the store.
+ * According to the Project Description, the test process can be divided into 4 steps.
+ * 
+ * In the result. The position represent for the relative offset of the value in the file. The size is the bytes the vale occupied in the file.
+ * 
+ * 
+ * */
+
 public class Test {
 
 	public static void main(String[] args) {
@@ -54,22 +64,28 @@ public class Test {
 		{
 			bytes8[i] = 8;
 		}
-		
+		//first step
 		test.Put(1, bytes1);
 		test.Put(2, bytes2);
 		test.Put(3, bytes3);
 		test.Put(4, bytes4);
 		
+		
+		//second step
 		test.Remove(2);
 		test.Put(5, bytes5);
 		test.Put(6, bytes6);
 		
+		//third step
 		test.Remove(3);
 		test.Put(7, bytes7);
+		
+		
+		//fourth step
 		test.Remove(5);
 		test.Put(8, bytes8);
 		
-		
+		//lay out display
 		test.showKeys();
 		test.showElements();
 		
@@ -98,11 +114,7 @@ public class Test {
 //		System.out.println("Here to show remove and get at the same time:");
 		
 		
-		
-		/*********************************Reboot Validation*********************************/
-//		System.out.println("Here to show reboot and get, here reboot means clear the megadata in the memory:");
-//		test.rebootAndget(6);
-		
+
 		
 		/*********************************Fragmentation Validation*********************************/
 		

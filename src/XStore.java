@@ -277,13 +277,22 @@ public class XStore {
     	{
     				public void run()
     				{
+    					Get(key);
+    					byte[] getValue=Get(key);
+    			        System.out.println("GET METHOD:Here is the value under key "+key);
+    					String byteArrayString = Arrays.toString(getValue);
+    					System.out.println(byteArrayString);
 //	    				try {
 //							Thread.sleep(500);//wait for the put
+//							
 //						} catch (InterruptedException e1) {
 //							// TODO Auto-generated catch block
 //							e1.printStackTrace();
 //						}
-	    				Get(key);
+//	    				byte[] getValue2=Get(key);
+//	    		        System.out.println("GET METHOD:Here is the value under key "+key);
+//	    				String byteArrayString1 = Arrays.toString(getValue2);
+//	    				System.out.println(byteArrayString1);
     				}        
     	}, "t2"
     	);
@@ -336,7 +345,6 @@ public class XStore {
     	System.out.println("Get key after the store have been cleared:");
     	byte[] getValue=Get(key);
         System.out.println("GET METHOD:Here is the value under key "+key);
-        System.out.println(getValue);
 		String byteArrayString = Arrays.toString(getValue);
 		System.out.println(byteArrayString);
     }
