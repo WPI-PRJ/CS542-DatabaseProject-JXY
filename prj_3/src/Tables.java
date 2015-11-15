@@ -6,11 +6,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**This class stores the data,representing the relation with operation open(),getNext() and close()
+ * 
+ * @author xiongkuang,MeiYang,TengyangJia
+ * **/
 public class Tables {
-	
+	//a string array list that stores each record of the table
 	private List<String[]> tuple=new ArrayList<String[]>();
+	//the table name
 	private String tableName;
+	//the table path
 	private String tablePath;
+	
 	private FileReader in=null; 
 	private BufferedReader br=null; 
 	
@@ -21,7 +28,8 @@ public class Tables {
 		this.tablePath=path;
 	}	
 	
-	
+	/**read the data from file and load it to the string array list
+	 * **/
 	public void open(){
 		try {
 			this.in = new FileReader(tablePath);
@@ -39,7 +47,9 @@ public class Tables {
 	}
 	
 	
-	
+	/**return a record from the table, every call of the method will get the next record of the previous call in the table
+	 * @return String[] a record of the table
+	 * **/
 	public String[] getNext(){
 		if(tuple.size()>1)
 		{
@@ -50,7 +60,8 @@ public class Tables {
 		else return null;
 	}
 
-	
+	/**this will close and clear all the resource we allocated for this read/open
+	 * **/
 	public void close(){
 		
 		try {
@@ -67,7 +78,8 @@ public class Tables {
 	}
 	
 	
-	
+	/**can print a selected attribute of a relation, projection, not used in this project
+	 * **/
 	public void select(String attribute)
 	{
 		int attrNo=-1;

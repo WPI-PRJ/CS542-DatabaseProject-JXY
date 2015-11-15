@@ -2,6 +2,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+
+/**this is the join class which use the getNext operator to join two relations under certain conditions
+ * **/
 public class Join {
 	
 	private Tables right;
@@ -19,7 +22,11 @@ public class Join {
 		l=L.getNext();
 	}
 	
-	
+	/**
+     * iterate the records, use the nested-loop join algorithm showed in the Chapter15
+     * for every record in left, find all records in right that could join with this record.
+     * @return String[] the next join result, a tuple
+     */
 	
 	public String[] getNext(){
 		String[] joinResult=null;
@@ -34,7 +41,7 @@ public class Join {
 				right.open();
 				r=right.getNext();
 			}
-			
+			//the join condition....hard code...
 			if(l[2].equals(r[0]))
 			{
 				joinResult=stringUnion(l,r);
@@ -46,7 +53,9 @@ public class Join {
 		return joinResult;
 	}
 
-	
+	/**union two string arrays to one string array
+	 * @return string[] 
+	 * **/
 	
 	public String[] stringUnion(String[] s1, String[] s2)
 	{
