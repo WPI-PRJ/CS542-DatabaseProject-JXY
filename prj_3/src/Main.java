@@ -32,6 +32,7 @@ public class Main {
 					System.out.println("The End");
 					break;
 				}
+				//output the tuple if the join result satisfied the condition without save it to a file, the pipeline
 				if(Integer.parseInt(tmp[4]) > 0.4* Integer.parseInt(tmp[11]))
 					System.out.println(tmp[1]);
 				
