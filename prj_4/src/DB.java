@@ -6,24 +6,25 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Relation {
+public class DB {
+	//The attributes of the database
 	private String[] attrs = null;
-	private ArrayList<Record> data = new ArrayList<Record>();
-	
+	//The data of the database
+	private ArrayList<Row> data = new ArrayList<Row>();
+	//the path of the csv file
 	private String file_path = null;
-	
+	//the path of the log file
 	private String log_path = null;
-	
+	//the path of the backup file
 	private String backup_path = null;
 	
-	public Relation(String file_name) throws IOException {
+	public DB(String file_name) throws IOException {
 		// TODO Auto-generated constructor stub
 		
 		//Initial of the data and the log file
 		this.file_path = file_name + ".csv";
 		this.log_path = file_name + ".log";
 		this.backup_path = file_name + "A" + ".csv";
-		
 		
 		File file = new File(file_path);
 		File log = new File(log_path);
@@ -45,7 +46,7 @@ public class Relation {
 			backup_file.createNewFile();
 		}
 		
-		//load the attributes
+		//load the attributes of the database
 		attrs = scanner.nextLine().split(",");
 		
 		FileWriter writer = new FileWriter(file);
@@ -55,13 +56,14 @@ public class Relation {
 			att = att + s + ",";
 		}
 		writer.write(att+"\n");
-		//load the data
+		//load the data from the data.csv
 		while(scanner.hasNextLine()) {
-			Record record = new Record(attrs, scanner.nextLine().split(","));
-			data.add(record);
-			writer.write(record.toString());
+			Row row = new Row(scanner.nextLine().split(","));
+			data.add(row);
+			writer.write(row.toString());
 		}
 		writer.close();
+		
 		//save the data into the backup file
 		scanner = new Scanner(file);
 		
@@ -70,8 +72,7 @@ public class Relation {
 		while(scanner.hasNextLine()) {
 			writer.write(scanner.nextLine());
 			writer.write("\n");
-		}
-		
+		}		
 		writer.close();
 	}
 	
@@ -79,23 +80,24 @@ public class Relation {
 		//load the file
 		File file = new File(file_path);
 		FileWriter writer = new FileWriter(file);
-		
+		//load the log file
 		File log = new File(log_path);
 		FileWriter log_writer = new FileWriter(log_path);
-		
+		//Write the attributes into the file
 		String att = "";
 		for(int i = 0; i < attrs.length; ++i) {
 			att = att + attrs[i] + ",";
 		}
 		writer.write(att + "\n");
-		
+		//update all the rows and store the log into log file
 		int index = 1;
-		for(Record r:data) {
+		for(Row r:data) {
+			//The format of the log file is index,attribute,old value,new value
 			String log_line = "";
 			log_line = log_line + index + ",";
 			log_line = log_line + attrs[4] + ",";
 			log_line = log_line + r.getAttr(4) + ",";
-			r.update(4);
+			r.update();
 			log_line = log_line + r.getAttr(4) + "\n";
 			log_writer.write(log_line);
 			writer.write(r.toString());
@@ -107,31 +109,109 @@ public class Relation {
 	}
 	
 	public void redo() throws IOException {
+		//load the backup file and the log file
 		File log = new File(log_path);
 		Scanner scanner = new Scanner(log);
 		File backup_file = new File(backup_path);
 		Scanner file_scanner = new Scanner(backup_file);
 		ArrayList<String> container = new ArrayList<String>();
-		
+		//write the attributes into the file
 		String att = "";
 		for(int i = 0; i < attrs.length; ++i) {
 			att = att + attrs[i] + ",";
 		}
 		container.add(att + "\n");
+		//redo the change to the backup file
 		while(scanner.hasNextLine()) {
 			String line = scanner.nextLine();
 			if(line.equals("commit"))
 				break;
 			String[] log_line = line.split(",");
+			//find the row that matches the log
 			while(file_scanner.hasNextLine()) {
 				String[] datas = file_scanner.nextLine().split(",");
 				if(datas[0].equals(log_line[0])) {
-					String new_line = datas[0] + "," + datas[1] + "," + datas[2] + "," + datas[3] + "," + log_line[3] + "\n";
+					//replace the value with the new value
+					//get the index of the attribute that changed in log
+					int index = 0;
+					for(int i = 0; i < attrs.length;++i) {
+						if(attrs[i].equals(log_line[1]))
+							index = i;
+					}
+					String new_line = "";
+					for(int i = 0;i < datas.length;++i) {
+						if(i != index)
+							new_line  += datas[i];
+						else
+							new_line += log_line[3];
+						if(i != datas.length-1)
+							new_line += ",";
+						else
+							new_line += "\n";
+					}
+					//String new_line = datas[0] + "," + datas[1] + "," + datas[2] + "," + datas[3] + "," + log_line[3] + "\n";
 					container.add(new_line);
 					break;
 				}
 			}
 		}
+		//write the row back
+		FileWriter writer = new FileWriter(backup_file);
+		for(String s:container) {
+			writer.write(s);
+		}
+		writer.close();
+	}
+	
+	public void undo() throws IOException {
+		//load the backup file and the log file
+		File log = new File(log_path);
+		Scanner scanner = new Scanner(log);
+		File backup_file = new File(backup_path);
+		Scanner file_scanner = new Scanner(backup_file);
+		ArrayList<String> container = new ArrayList<String>();
+		//write the attributes into the file
+		String att = "";
+		for(int i = 0; i < attrs.length; ++i) {
+			att = att + attrs[i] + ",";
+		}
+		container.add(att + "\n");
+		//redo the change to the backup file
+		while(scanner.hasNextLine()) {
+			String line = scanner.nextLine();
+			if(line.equals("commit"))
+				break;
+			String[] log_line = line.split(",");
+			//find the row that matches the log
+			while(file_scanner.hasNextLine()) {
+				String[] datas = file_scanner.nextLine().split(",");
+				if(datas[0].equals(log_line[0])) {
+					//replace the value with the new value
+					//get the index of the attribute that changed in log
+					int index = 0;
+					for(int i = 0; i < attrs.length;++i) {
+						if(attrs[i].equals(log_line[1]))
+							index = i;
+					}
+					String new_line = "";
+					//build the new line
+					for(int i = 0;i < datas.length;++i) {
+						if(i != index)
+							new_line  += datas[i];
+						else
+							new_line += log_line[2];
+						if(i != datas.length-1)
+							new_line += ",";
+						else
+							new_line += "\n";
+					}
+					//String new_line = datas[0] + "," + datas[1] + "," + datas[2] + "," + datas[3] + "," + log_line[3] + "\n";
+					container.add(new_line);
+					break;
+				}
+			}
+		}
+		//write the row back
 		FileWriter writer = new FileWriter(backup_file);
 		for(String s:container) {
 			writer.write(s);
@@ -177,5 +257,44 @@ public class Relation {
 	
 	public String getLogPath() {
 		return log_path;
+	}
+	
+	//The inner class to store the row of the database
+	private class Row {
+		//The data of the database
+		private String[] values = null;
+		
+		public Row(String[] values) {
+			// TODO Auto-generated constructor stub
+			//Create one new row from given values
+			this.values = new String[attrs.length];
+			for(int i = 0; i < attrs.length; ++i) {
+				this.values[i] = values[i];
+			}
+		}
+		
+		@Override
+		//convert this row to string
+		public String toString() {
+			// TODO Auto-generated method stub
+			String string = "";
+			for(int i = 0; i < values.length; ++i) {
+				string += values[i] + ",";
+			}
+			string += "\n";
+			return string;
+		}
+		
+		//Increase the population of this record
+		public void update() {
+			int orig_value = Integer.parseInt(values[4]);
+			int new_value = (int)(orig_value * 1.02);
+			values[4] = new_value + "";
+		}
+		
+		//Get the value of the attribute given by index
+		public String getAttr(int index) {
+			return values[index];
+		}
 	}
 }
